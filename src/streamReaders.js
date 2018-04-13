@@ -20,9 +20,12 @@ const REGEXES = {
  * @returns {CommentToken}
  */
 export function comment(stream) {
-  const index = stream.indexOf('-->');
+  const endNeedle = '-->';
+  const index = stream.indexOf(endNeedle);
+  const startIndex = String('<!--').length;
+  const endIndex = index + endNeedle.length;
   if (index >= 0) {
-    return new CommentToken(stream.substr(4, index - 1), index + 3);
+    return new CommentToken(stream.substring(startIndex, endIndex), endIndex);
   }
 }
 
@@ -92,6 +95,18 @@ export function atomicTag(stream) {
           match[0].length + start.length,
           start.attrs, start.booleanAttrs, match[1]);
       }
+    } else if (rest.match(new RegExp('[\\s\\S]*?<', 'i'))) {
+      // capturing the content is inefficient, so we do it inside the if
+      const match = rest.match(new RegExp('([\\s\\S]*?)<', 'i'));
+      if (match) {
+        return new AtomicTagToken(start.tagName,
+          match[0].length + start.length - 1,
+          start.attrs, start.booleanAttrs, match[1]);
+      }
+    } else if (rest && rest.length > 0) {
+        return new AtomicTagToken(start.tagName,
+          rest.length + start.length,
+          start.attrs, start.booleanAttrs, rest);
     }
   }
 }

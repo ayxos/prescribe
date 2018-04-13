@@ -2,6 +2,10 @@ import {testParse, parses, fixes, parsesCompletely} from '../helpers/testParse';
 
 describe('HtmlParser (tags)', () => {
   describe('#readToken', () => {
+    it('parses html tag and comment completely', parsesCompletely('<div id="foo"><i> djhgdg </d>hi there</div><!-- <script type="javascript">/* sgksjgs */ var d = "test"; //test variable </script>-->', s => {
+      expect(s).to.equal('<div id="foo"><i> djhgdg </d>hi there</div><!-- <script type="javascript">/* sgksjgs */ var d = "test"; //test variable </script>-->');
+    }));
+
     it('parses closed div tag completely', parsesCompletely('<div id="foo">hi there</div>', s => {
       expect(s).to.equal('<div id="foo">hi there</div>');
     }));
@@ -18,20 +22,24 @@ describe('HtmlParser (tags)', () => {
       expect(s).to.equal('<div id="foo">hi there');
     }));
 
-    it('parses open script tag completely', parsesCompletely('<script id="foo" text="text/javascript">// hi there', s => {
-      expect(s).to.equal('');
+    it('parses broken atomic tag completely', parsesCompletely('<b class="foo">content</i>', s => {
+      expect(s).to.equal('<b class="foo">content</i>');
+    }));
+
+    it('parses open script tag completely', parsesCompletely('<script id="foo" text="text/javascript">// hi there<script>', s => {
+      expect(s).to.equal('<script id="foo" text="text/javascript">// hi there</script><script>');
     }));
 
     it('parses open style tag completely', parsesCompletely('<style id="foo" text="text/css">/* hi there */', s => {
-      expect(s).to.equal('');
+      expect(s).to.equal('<style id="foo" text="text/css">/* hi there */</style>');
     }));
 
     it('parses open SCRIPT tag completely', parsesCompletely('<SCRIPT id="foo" text="text/javascript">// hi there', s => {
-      expect(s).to.equal('');
+      expect(s).to.equal('<SCRIPT id="foo" text="text/javascript">// hi there</SCRIPT>');
     }));
 
     it('parses open STYLE tag completely', parsesCompletely('<STYLE id="foo" text="text/css">/* hi there */', s => {
-      expect(s).to.equal('');
+      expect(s).to.equal('<STYLE id="foo" text="text/css">/* hi there */</STYLE>');
     }));
 
     it('parses closed FB tags completely', parsesCompletely('<fb:ad placementid="1234" format="320x50" testmode="true">FB</fb:ad>', s => {

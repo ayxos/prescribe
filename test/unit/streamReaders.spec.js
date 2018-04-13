@@ -10,8 +10,14 @@ describe('streamReaders', () => {
 
     it('reads comment with remainder', () => {
       const tok = streamReaders.comment('-->foo');
-      expect(tok).to.have.property('content', '');
+      expect(tok).to.have.property('content', 'f');
       expect(tok).to.have.property('length', 3);
+    });
+
+    it('reads comment properly', () => {
+      const tok = streamReaders.comment('<!--function(){console.log("test");}-->');
+      expect(tok).to.have.property('content', 'function(){console.log("test");}-->');
+      expect(tok).to.have.property('length', 39);
     });
 
     it('returns undefined for no comment', () => {
@@ -57,7 +63,11 @@ describe('streamReaders', () => {
 
     it('returns undefined for a broken atomic tag', () => {
       const tok = streamReaders.atomicTag('<b class="foo">content</i>');
-      expect(tok).not.to.be.ok();
+      expect(tok).to.have.property('tagName', 'b');
+      expect(tok).to.have.property('attrs');
+      expect(tok.attrs).to.have.property('class', 'foo');
+      expect(tok).to.have.property('content', 'content');
+      expect(tok).to.have.property('length', 22); // length is weird
     });
   });
 
